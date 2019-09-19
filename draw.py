@@ -5,6 +5,7 @@ from math import floor, ceil
 from os import listdir
 from csv import reader
 from time import time
+import label_gui
 
 def load_data(file_path):
     f = open(file_path, 'r')
@@ -79,12 +80,12 @@ def find_rects(image, max_indices, rows, columns, rect_rows, rect_columns):
         # plt.pause(0.00001)
 
         # color rectangle
-        if 128 < row_max[cnt] < 270 and col_max[cnt] < 128:
-            color = np.array([1.0, 0.0, 0.0])
-        elif 128 <= col_max[cnt] <= 150:
-            color = np.array([1.0, 0.647, 0.0])
+        if cnt == 0:      # 128 < row_max[cnt] < 270 and col_max[cnt] < 128:
+            color = np.array([1.0, 0.0, 0.0])  # red
+        elif cnt == 2:              # 128 <= col_max[cnt] <= 150:
+            color = np.array([1.0, 0.647, 0.0])  # orange
         else:
-            color = np.array([1.0, 1.0, 1.0])
+            color = np.array([1.0, 1.0, 1.0])  # white
 
         image[row_max[cnt]-32 : row_max[cnt]+32, col_max[cnt]-3] = color  # left line
         image[row_max[cnt]-32 : row_max[cnt]+32, col_max[cnt]+4] = color  # right line
@@ -136,8 +137,11 @@ def draw (dir_path, scaler, rows, columns):
         plt.imshow(img, aspect='auto')
         plt.title(file)
         plt.pause(000000.1)
+
+        label_gui.run_gui()
+
         stop = time()
-        # print(stop-start)
+        print(stop-start)
     plt.show()
 
 def find_max_avg_in_all(dir_path):
