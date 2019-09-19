@@ -20,30 +20,76 @@ def load_data(file_path):
     return nump
 
 
-def find_rects(image, max_indices, rows, columns):
-    image = np.pad(image, ((64, 64), (8, 8), (0, 0)), mode='constant', constant_values=((0,0), (0,0), (0,0)))
+def overlap(row1, col1, row2, col2, rect_rows, rect_cols):
+    col_left = floor( (rect_cols-1)/2 )
+    col_right = ceil( (rect_cols-1)/2 )
+    row_down = ceil( (rect_rows-1)/2 )
+    row_up = floor( (rect_rows-1)/2 )
 
-    i = 0; cond_met = False; rect_cant_be_found = False
-    while not cond_met and not rect_cant_be_found:
-        row_max = floor( max_indices[i] / columns )
-        col_max = max_indices[i] % columns
-        cond_met = True
-        i += 1
-        if i >= max_indices.size:
-            rect_cant_be_found = True
+    if row1 < row2:
+        row1, row2 = row2, row1
+        col1, col2 = col2, col1
 
-    # adjust indices for padded elements
-    row_max += 64
-    col_max += 8
+    if col1 > col2:
+        x = max(0, (col2+col_right) - (col1-col_left) + 1)
+    else:
+        x = max(0, (col1+col_right) - (col2-col_left) + 1)
+    y = max(0, (row2+row_up) - (row1-row_down) + 1)
 
-    # amplitude at center is at indices (32, 3)
-    rect = image[row_max-32 : row_max+32, col_max-3 : col_max+5]  # array[start:stop-1]
+    return (x*y) / (rect_cols*rect_rows)
 
-    # color rectangle red
-    image[row_max-32 : row_max+32, col_max-3] = np.array([1.0, 0.0, 0.0])  # left line
-    image[row_max-32 : row_max+32, col_max+4] = np.array([1.0, 0.0, 0.0])  # right line
-    image[row_max-32, col_max-3 : col_max+5] = np.array([1.0, 0.0, 0.0])  # bottom line
-    image[row_max+31, col_max-3 : col_max+5] = np.array([1.0, 0.0, 0.0])  # upper line
+
+def find_rects(image, max_indices, rows, columns, rect_rows, rect_columns):
+    image = np.pad(image, ((rect_rows, rect_rows), (rect_columns, rect_columns), (0, 0)),
+                   mode='constant', constant_values=((0,0), (0,0), (0,0)))
+
+    row_max = np.zeros((3,)).astype(int); col_max = np.zeros((3,)).astype(int)
+    i = 0
+    for cnt in range(3):
+        cond_met = False; rect_cant_be_found = False
+        while not cond_met and not rect_cant_be_found:
+            row_max[cnt] = floor( max_indices[i] / columns )
+            col_max[cnt] = max_indices[i] % columns
+
+            # adjust indices for padded elements
+            row_max[cnt] += 64
+            col_max[cnt] += 8
+
+            for j in range(cnt):
+                if overlap(row_max[j], col_max[j], row_max[cnt], col_max[cnt], rect_rows, rect_columns) < 0.3:
+                    cond_met = True
+                else:
+                    cond_met = False
+                    break
+            if cnt == 0:
+                cond_met = True
+
+            i += 1
+            if i >= max_indices.size:
+                rect_cant_be_found = True
+                print("cant be found")
+
+        # rectangle - amplitude at center is at indices (32, 3)
+        rect = image[row_max[cnt]-32 : row_max[cnt]+32, col_max[cnt]-3 : col_max[cnt]+5]  # array[start:stop-1]
+
+        # draw rectangle
+        # fig = plt.figure('Rectangle')
+        # plt.cla()
+        # plt.imshow(rect)
+        # plt.pause(0.00001)
+
+        # color rectangle
+        if 128 < row_max[cnt] < 270 and col_max[cnt] < 128:
+            color = np.array([1.0, 0.0, 0.0])
+        elif 128 <= col_max[cnt] <= 150:
+            color = np.array([1.0, 0.647, 0.0])
+        else:
+            color = np.array([1.0, 1.0, 1.0])
+
+        image[row_max[cnt]-32 : row_max[cnt]+32, col_max[cnt]-3] = color  # left line
+        image[row_max[cnt]-32 : row_max[cnt]+32, col_max[cnt]+4] = color  # right line
+        image[row_max[cnt]-32, col_max[cnt]-3 : col_max[cnt]+5] = color  # bottom line
+        image[row_max[cnt]+31, col_max[cnt]-3 : col_max[cnt]+5] = color  # upper line
 
     return image
 
@@ -51,7 +97,7 @@ def find_rects(image, max_indices, rows, columns):
 def draw (dir_path, scaler, rows, columns):
     for file in listdir(dir_path):
         start = time()
-        if not file.startswith('Cube-0'):
+        if not file.startswith('Cube-2'):
             continue
 
         file_path = dir_path + '\\' + file
@@ -83,8 +129,9 @@ def draw (dir_path, scaler, rows, columns):
         img = np.delete(color, 3, axis=2)  # rgba - discarding a
 
         # finding rectangles
-        img = find_rects(img, max_indices, img.shape[0], img.shape[1])
+        img = find_rects(img, max_indices, img.shape[0], img.shape[1], 64, 8)
 
+        plt.figure('Image')
         plt.cla()
         plt.imshow(img, aspect='auto')
         plt.title(file)
@@ -137,4 +184,4 @@ def izbaci_prva_dva_broja(dir_path):
 
 # izbaci_prva_dva_broja('D:\Geolux\Snimka1')
 # find_max_avg_in_all('D:\Geolux\Snimka1')
-draw('D:\Geolux\Snimka1', 2e4*5, 256, 512)
+draw('D:\Geolux\Snimka1', 2e3*5, 256, 512)
