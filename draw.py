@@ -53,8 +53,8 @@ def find_rects(image, max_indices, rows, columns, rect_rows, rect_columns):
             col_max[cnt] = max_indices[i] % columns
 
             # adjust indices for padded elements
-            row_max[cnt] += 64
-            col_max[cnt] += 8
+            row_max[cnt] += rect_rows
+            col_max[cnt] += rect_columns
 
             for j in range(cnt):
                 if overlap(row_max[j], col_max[j], row_max[cnt], col_max[cnt], rect_rows, rect_columns) < 0.3:
@@ -82,7 +82,7 @@ def find_rects(image, max_indices, rows, columns, rect_rows, rect_columns):
         # color rectangle
         if cnt == 0:      # 128 < row_max[cnt] < 270 and col_max[cnt] < 128:
             color = np.array([1.0, 0.0, 0.0])  # red
-        elif cnt == 2:              # 128 <= col_max[cnt] <= 150:
+        elif cnt == 1:              # 128 <= col_max[cnt] <= 150:
             color = np.array([1.0, 0.647, 0.0])  # orange
         else:
             color = np.array([1.0, 1.0, 1.0])  # white
@@ -92,7 +92,7 @@ def find_rects(image, max_indices, rows, columns, rect_rows, rect_columns):
         image[row_max[cnt]-32, col_max[cnt]-3 : col_max[cnt]+5] = color  # bottom line
         image[row_max[cnt]+31, col_max[cnt]-3 : col_max[cnt]+5] = color  # upper line
 
-    return image
+    return image, row_max, col_max
 
 
 def draw (dir_path, scaler, rows, columns):
@@ -130,7 +130,7 @@ def draw (dir_path, scaler, rows, columns):
         img = np.delete(color, 3, axis=2)  # rgba - discarding a
 
         # finding rectangles
-        img = find_rects(img, max_indices, img.shape[0], img.shape[1], 64, 8)
+        img, row_max, col_max = find_rects(img, max_indices, img.shape[0], img.shape[1], 64, 8)
 
         plt.figure('Image')
         plt.cla()
@@ -138,10 +138,10 @@ def draw (dir_path, scaler, rows, columns):
         plt.title(file)
         plt.pause(000000.1)
 
-        label_gui.run_gui()
+        label_gui.run_gui(file, rd, row_max, col_max)
 
         stop = time()
-        print(stop-start)
+        print(file)
     plt.show()
 
 def find_max_avg_in_all(dir_path):
@@ -188,4 +188,4 @@ def izbaci_prva_dva_broja(dir_path):
 
 # izbaci_prva_dva_broja('D:\Geolux\Snimka1')
 # find_max_avg_in_all('D:\Geolux\Snimka1')
-draw('D:\Geolux\Snimka1', 2e3*5, 256, 512)
+draw('D:/Geolux/Snimka1', 2e3*5, 256, 512)
