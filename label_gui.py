@@ -34,7 +34,7 @@ def next_img(root):
     return
 
 
-def save_img(root, file, rd, row_max, col_max):
+def save_img(root, base_path, file, rd, row_max, col_max):
     global red, orange, white, exit_flag
     if red == 'NOT' or orange == 'NOT' or white == 'NOT':
         return
@@ -50,19 +50,19 @@ def save_img(root, file, rd, row_max, col_max):
     rect_white = np.reshape(rect_white, (64, 8))
 
 
-    f = open('data/' + red[7:len(red)] + '/red_' + file, 'w')
+    f = open(base_path + red[7:len(red)] + '/' + file[0:len(file)-4] + '_red.txt', 'w')
     rect_red_array = np.asarray(rect_red)
     np.savetxt(f, np.asarray([row_max[0], col_max[0]]), delimiter=',')
     np.savetxt(f, rect_red_array, delimiter=',')
     f.close()
 
-    f = open('data/' + orange[10:len(orange)] + '/orange_' + file, 'w')
+    f = open(base_path + orange[10:len(orange)] + '/' + file[0:len(file)-4] + '_orange.txt', 'w')
     rect_orange_array = np.asarray(rect_orange)
     np.savetxt(f, np.asarray([row_max[1], col_max[1]]), delimiter=',')
     np.savetxt(f, rect_orange_array, delimiter=',')
     f.close()
 
-    f = open('data/' + white[9:len(white)] + '/white_' + file, 'w')
+    f = open(base_path + white[9:len(white)] + '/' + file[0:len(file)-4] + '_white.txt', 'w')
     rect_white_array = np.asarray(rect_white)
     np.savetxt(f, np.asarray([row_max[2], col_max[2]]), delimiter=',')
     np.savetxt(f, rect_white_array, delimiter=',')
@@ -76,7 +76,7 @@ def save_img(root, file, rd, row_max, col_max):
     return
 
 
-def run_gui(file, rd, row_max, col_max):
+def run_gui(base_path, file, rd, row_max, col_max):
     root = tk.Tk()
     root.geometry("600x400+700+200")
 
@@ -112,7 +112,7 @@ def run_gui(file, rd, row_max, col_max):
     txt_gui.pack(side=tk.BOTTOM)
     txt_gui.insert(tk.CURRENT, red + "   |||   " + orange + "   |||   " + white)
 
-    next = tk.Button(master=root, text = 'NEXT', command=lambda: save_img(root, file, rd, row_max, col_max), bg='green').place(x=450, y=135, width=90, height=60)
+    next = tk.Button(master=root, text = 'NEXT', command=lambda: save_img(root, base_path, file, rd, row_max, col_max), bg='green').place(x=450, y=135, width=90, height=60)
     skip = tk.Button(master=root, text = 'SKIP', command=lambda: next_img(root), bg='grey').place(x=450, y=245, width=90, height=60)
 
     while not exit_flag:

@@ -101,7 +101,7 @@ def draw (dir_path, scaler, rows, columns):
         if not file.startswith('Cube-2'):
             continue
 
-        file_path = dir_path + '\\' + file
+        file_path = dir_path + file
 
         # range_doppler2 = np.genfromtxt(file_path, delimiter=',')
         range_doppler = load_data(file_path)
@@ -138,7 +138,7 @@ def draw (dir_path, scaler, rows, columns):
         plt.title(file)
         plt.pause(000000.1)
 
-        label_gui.run_gui(file, rd, row_max, col_max)
+        # label_gui.run_gui('C:/Users/Ivan/Documents/Geolux/data/Snimka2/', file, rd, row_max, col_max)
 
         stop = time()
         print(file)
@@ -150,7 +150,7 @@ def find_max_avg_in_all(dir_path):
         if not file.startswith('Cube-0'):
             continue
 
-        file_path = dir_path + '\\' + file
+        file_path = dir_path + file
         f = open(file_path, 'r')
         cs = reader(f)
         cnt = 0; br = 0; suma = 0
@@ -175,7 +175,7 @@ def izbaci_prva_dva_broja(dir_path):
         if file[0] == '.':
             continue
 
-        file_path = dir_path + '\\' + file
+        file_path = dir_path + file
         f = open(file_path, 'r+')
         rd = f.read()
         f.close()
@@ -186,6 +186,6 @@ def izbaci_prva_dva_broja(dir_path):
 
         print(file)
 
-# izbaci_prva_dva_broja('D:\Geolux\Snimka1')
-# find_max_avg_in_all('D:\Geolux\Snimka1')
-draw('D:/Geolux/Snimka1', 2e3*5, 256, 512)
+# izbaci_prva_dva_broja('D:/Geolux/Snimka2/')
+# find_max_avg_in_all('D:\Geolux\Snimka1/')
+draw('D:/Geolux/Snimka1/', 2e3*5, 256, 512)
