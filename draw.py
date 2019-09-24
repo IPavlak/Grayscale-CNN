@@ -95,7 +95,7 @@ def find_rects(image, max_indices, rows, columns, rect_rows, rect_columns):
     return image, row_max, col_max
 
 
-def draw (dir_path, scaler, rows, columns):
+def draw (dir_path, scalar, rows, columns):
     for file in listdir(dir_path):
         start = time()
         if not file.startswith('Cube-2'):
@@ -106,7 +106,7 @@ def draw (dir_path, scaler, rows, columns):
         # range_doppler2 = np.genfromtxt(file_path, delimiter=',')
         range_doppler = load_data(file_path)
 
-        rd = range_doppler / scaler
+        rd = range_doppler / scalar
         # print(rd.max())
 
         cmap = cm.get_cmap('plasma')

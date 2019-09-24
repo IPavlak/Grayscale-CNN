@@ -8,6 +8,7 @@ def load_RD_detected_imgs(base_path, cube,  dirs, dir_labels):
     labels = np.array([])
     for i in range(len(dirs)):
         directory = base_path + dirs[i]
+
         file_labels = np.repeat(dir_labels[i], len(listdir(directory)))
         labels = np.append(labels, file_labels)
 
