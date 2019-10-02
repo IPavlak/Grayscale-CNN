@@ -14,16 +14,23 @@ VERBOSE = 1
 # VERBOSE >= 1 -> print model summery and results
 # VERBOSE >= 2 -> plot graphs
 
+
+############################################### Preprocessing ##################################################
 if VERBOSE >= 1:
     print("Reading training data...")
 
-############################################### Preprocessing ##################################################
 # Read images
-X_train, X_train_add, y_train = load_RD_detected_imgs('C:/Users/Ivan/Documents/Geolux/data/Snimka1/', 'Cube-2',
+X_train, X_train_add, y_train = load_RD_detected_imgs('C:/Users/Ivan/Documents/Geolux/data/Snimka1/', 'Cube-0',
                                                       ['man', 'car', 'nothing', 'wrong_car'], [1, 0, 0, 0])
 
-# Normalize data and reshape it for ConvNet
-X_train /= X_train.max()
+# X_train2, X_train_add2, y_train2 = load_RD_detected_imgs('C:/Users/Ivan/Documents/Geolux/data/Snimka2/', 'Cube-0',
+#                                                          ['man', 'car', 'nothing', 'wrong_car'], [1, 0, 0, 0])
+# X_train = np.append(X_train, X_train2)
+# X_train_add = np.append(X_train_add, X_train_add2)
+# y_train = np.append(y_train, y_train2)
+
+# Normalize data and reshape it for ConvNet - X_train already normalized X_train.max() = 1.0 !!!
+# X_train /= X_train.max()
 X_train = X_train.reshape(-1, 64, 8, 1)
 X_train_add /= 256.0
 X_train_add = X_train_add.reshape(-1, 2)
@@ -39,7 +46,7 @@ if VERBOSE >= 2:
 
 # Divide training set into train and validation set (10% in validation set) and shuffle the data
 X_train, X_val, y_train, y_val, X_train_add, X_val_add = \
-    train_test_split(X_train, y_train, X_train_add, test_size = 0.2, random_state = 2)
+    train_test_split(X_train, y_train, X_train_add, test_size = 0.1, random_state = 2)
 
 
 ########################################### Build a CNN model #################################################
@@ -74,7 +81,7 @@ if VERBOSE == 0:
     verb = 0
 else:
     verb = 2
-history = model.fit([X_train, X_train_add], y_train, epochs = 100, batch_size = 128, class_weight={0: 1., 1: 2.},
+history = model.fit([X_train, X_train_add], y_train, epochs = 100, batch_size = 128, class_weight={0: 1., 1: 1.4},
                     validation_data = ([X_val, X_val_add], y_val), verbose = verb)
 
 ################################################ Analisys ##################################################
@@ -109,16 +116,18 @@ if VERBOSE >= 2:
     plt.title('Training and Validation Accuracy')
     plt.legend()
 
-# model.save('model_trained_on_snimka1_delete')
+# model.save('model_trained_on_snimka1_and_snimka2_Cube_0.h5')
+exit(0)
 
 if VERBOSE >= 1:
     print("Reading test data...")
 
 # Import test data
-X_test, X_test_add, y_test = load_RD_detected_imgs('C:/Users/Ivan/Documents/Geolux/data/Snimka2/', 'Cube-2',
+X_test, X_test_add, y_test = load_RD_detected_imgs('C:/Users/Ivan/Documents/Geolux/data/Snimka2/', 'Cube-0',
                                                    ['man', 'car', 'nothing', 'wrong_car'], [1, 0, 0, 0])
 
 # Normalize data and reshape it for ConvNet !!! X_test already normalized (saturated)
+X_test /= X_test.max()
 X_test = X_test.reshape(-1, 64, 8, 1)
 X_test_add /= 256.0
 X_test_add = X_test_add.reshape(-1, 2)
@@ -131,8 +140,9 @@ if VERBOSE >= 1:
 y_pred = np.around( model.predict([X_test, X_test_add]) )
 correct = np.sum(y_pred == y_test)
 accuracy = correct / y_test.size
+print("Number of samples: {}". format(y_test.size))
 print("Accuracy = {0:.4f}".format(accuracy))
 
 con_mat = confusion_matrix(y_test, y_pred)
 print("Confusion matrix:")
-print(con_mat)
+print(con_mat / y_test.size)

@@ -1,5 +1,6 @@
 import tkinter as tk
 import numpy as np
+from math import floor, ceil
 
 red = 'NOT'
 orange = 'NOT'
@@ -34,20 +35,25 @@ def next_img(root):
     return
 
 
-def save_img(root, base_path, file, rd, row_max, col_max):
+def save_img(root, base_path, file, rd, row_max, col_max, rect_rows, rect_cols):
     global red, orange, white, exit_flag
     if red == 'NOT' or orange == 'NOT' or white == 'NOT':
         return
 
-    rd = np.pad(rd, ((64, 64), (8, 8)), mode='constant', constant_values=((0,0), (0,0)))
+    rd = np.pad(rd, ((rect_rows, rect_rows), (rect_cols, rect_cols)), mode='constant', constant_values=((0,0), (0,0)))
 
-    rect_red = rd[row_max[0]-32 : row_max[0]+32, col_max[0]-3 : col_max[0]+5]  # array[start:stop-1]
-    rect_orange = rd[row_max[1]-32 : row_max[1]+32, col_max[1]-3 : col_max[1]+5]  # array[start:stop-1]
-    rect_white = rd[row_max[2]-32 : row_max[2]+32, col_max[2]-3 : col_max[2]+5]  # array[start:stop-1]
+    col_left = floor((rect_cols - 1) / 2)
+    col_right = ceil((rect_cols - 1) / 2)
+    row_down = ceil((rect_rows - 1) / 2)
+    row_up = floor((rect_rows - 1) / 2)
 
-    rect_red = np.reshape(rect_red, (64, 8))
-    rect_orange = np.reshape(rect_orange, (64, 8))
-    rect_white = np.reshape(rect_white, (64, 8))
+    rect_red = rd[row_max[0]-row_down : row_max[0]+row_up+1, col_max[0]-col_left : col_max[0]+col_right+1]  # array[start:stop+1]
+    rect_orange = rd[row_max[1]-row_down : row_max[1]+row_up+1, col_max[1]-col_left : col_max[1]+col_right+1]  # array[start:stop+1]
+    rect_white = rd[row_max[2]-row_down : row_max[2]+row_up+1, col_max[2]-col_left : col_max[2]+col_right+1]  # array[start:stop+1]
+
+    rect_red = np.reshape(rect_red, (rect_rows, rect_cols))
+    rect_orange = np.reshape(rect_orange, (rect_rows, rect_cols))
+    rect_white = np.reshape(rect_white, (rect_rows, rect_cols))
 
 
     f = open(base_path + red[7:len(red)] + '/' + file[0:len(file)-4] + '_red.txt', 'w')
@@ -76,9 +82,9 @@ def save_img(root, base_path, file, rd, row_max, col_max):
     return
 
 
-def run_gui(base_path, file, rd, row_max, col_max):
+def run_gui(base_path, file, rd, row_max, col_max, rect_rows, rect_cols):
     root = tk.Tk()
-    root.geometry("600x400+700+200")
+    root.geometry("600x400+700+200")  # size and placement of the gui window respectively
 
     global exit_flag
     exit_flag = False
@@ -112,7 +118,7 @@ def run_gui(base_path, file, rd, row_max, col_max):
     txt_gui.pack(side=tk.BOTTOM)
     txt_gui.insert(tk.CURRENT, red + "   |||   " + orange + "   |||   " + white)
 
-    next = tk.Button(master=root, text = 'NEXT', command=lambda: save_img(root, base_path, file, rd, row_max, col_max), bg='green').place(x=450, y=135, width=90, height=60)
+    next = tk.Button(master=root, text = 'NEXT', command=lambda: save_img(root, base_path, file, rd, row_max, col_max, rect_rows, rect_cols), bg='green').place(x=450, y=135, width=90, height=60)
     skip = tk.Button(master=root, text = 'SKIP', command=lambda: next_img(root), bg='grey').place(x=450, y=245, width=90, height=60)
 
     while not exit_flag:

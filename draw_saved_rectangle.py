@@ -4,6 +4,14 @@ import matplotlib.pyplot as plt
 
 
 def draw_saved_rectangle(file = None, rd = None):
+    """
+    Function draws a rectangle either from given file or from given numpy ndarray (matrix)
+
+    :param file: path to file with saved rectangle (optional), default: None
+    :param rd: numpy ndarray (matrix) with rectangle data (optional), default: None
+    :return: void
+    """
+
     if file is None and rd is None:
         print("Error: draw_saved_rectangle called with both None parameters")
         return
@@ -27,4 +35,4 @@ def draw_saved_rectangle(file = None, rd = None):
 
 
 
-# draw_saved_rectangle('C:/Users/Ivan/Documents/Geolux/data/garbage/red_Cube-2-0005.txt')
+# draw_saved_rectangle(file='C:/Users/Ivan/Documents/Geolux/data/Snimka1/nothing/Cube-1-0103_white.txt')
